@@ -1,11 +1,11 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const expressSession = require('express-session')
+const session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
 const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
-require('dotenv').config
+require('dotenv').config()
 
 const routes = require('./routes')
 
@@ -42,6 +42,7 @@ app.get('/', (req, res) => {
     res.send(`<h1>Dispricery</h1>`)
 })
 
+app.use('/api/v1', routes)
 app.use('/api/v1/user', routes.users)
 app.use('/api/v1/auth', routes.auth)
 
