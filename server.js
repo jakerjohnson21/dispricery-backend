@@ -42,6 +42,9 @@ app.get('/', (req, res) => {
     res.send(`<h1>Dispricery</h1>`)
 })
 
+app.use('/api/v1/user', routes.users)
+app.use('/api/v1/auth', routes.auth)
+
 app.listen(3000, () => {
     return console.log(`Server connected at http://localhost:3000`)
 })
