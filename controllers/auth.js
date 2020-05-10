@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt')
 //Register
 const register = (req, res) => {
     
+    console.log('Register called');
+    console.log(req.body);
     //Check for required input data
     if(!req.body.name || !req.body.email || !req.body.password) {
         return res.status(400).json({
@@ -12,27 +14,35 @@ const register = (req, res) => {
     }
 
     //Check if user already exists
-    db.User.findOne({ email: req.body.email }, (err, foundUser) => {
-        if (err) return res.status(500).json({
-            message: 'Error checking for existing user. Try again'
-        })
+    db.User.find({ email: req.body.email }, (err, foundUser) => {
+        if (err) {
+            return res.status(500).json({
+                message: 'Error checking for existing user. Try again'
+            }) 
+        }
 
         //If user is found, respond
-        if(foundUser) return res.status(200).json({
-            message: 'A user with that email already exists.'
-        })
+        if(foundUser.length != 0) {
+            return res.status(200).json({
+                message: 'A user with that email already exists.'
+            })
+        }
 
         //Generate safe password
         bcrypt.genSalt(10, (err, salt) => {
-            if (err) return res.status(500).json({
-                message: 'Error with bcrypt salt'
-            })
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error with bcrypt salt'
+                })
+            }
 
             //Hash user's password using generated salt
             bcrypt.hash(req.body.password, salt, (err, hash) => {
-                if (err) return res.status(500).json({
-                    message: 'Error with bcrypt hash'
-                })
+                if (err) {
+                    return res.status(500).json({
+                        message: 'Error with bcrypt hash'
+                    })
+                }
 
                 const newUser = {
                     name: req.body.name,
@@ -44,7 +54,7 @@ const register = (req, res) => {
                 db.User.create(newUser, (err, savedUser) => {
                     if (err) return res.status(500).json({ status: 500, message: err })
 
-                    return res.status(200).json({ status: 200, message: `${newUser.name} registered as new user.`})
+                    return res.status(200).json({ status: 200, userId: savedUser._id, message: `${newUser.name} registered as new user.`})
                 })
             })
         })
@@ -56,7 +66,7 @@ const login = (req, res) => {
         return res.status(400).json({ status: 400, message: 'Please enter your email and password.'});
     }
 
-    db.User.findOne({ email: req.body.email }, (err, foundUser) => {
+    db.User.find({ email: req.body.email }, (err, foundUser) => {
         if (err) return res.status(500).json({ status: 500, message: `${err}`});
 
         if (!foundUser) {

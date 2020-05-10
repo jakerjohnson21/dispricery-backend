@@ -16,13 +16,9 @@ const UserSchema = new mongoose.Schema({
     },
     dateJoined: {
         type: Date,
-        default: Data.now
-    },
-    savedDispensaries: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Dispensary'
-    }]
-})
+        default: Date.now
+    }
+});
 
 const User = mongoose.model("User", UserSchema);
 
