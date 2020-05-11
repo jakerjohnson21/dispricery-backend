@@ -6,5 +6,6 @@ const ctrl = require('../controllers/users')
 
 //Get user info from ID
 router.get('/:id', ctrl.getUser)
+router.put('/:id', ctrl.addFavorite)
 
 module.exports = router;

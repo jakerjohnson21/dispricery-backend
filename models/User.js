@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Dispensary = require('./Dispensary');
 
 const UserSchema = new mongoose.Schema({
     name: {
@@ -17,7 +16,13 @@ const UserSchema = new mongoose.Schema({
     dateJoined: {
         type: Date,
         default: Date.now
-    }
+    },
+    favorites: [{
+        name: String,
+        slug: String,
+        image: String,
+        website: String
+    }]
 });
 
 const User = mongoose.model("User", UserSchema);

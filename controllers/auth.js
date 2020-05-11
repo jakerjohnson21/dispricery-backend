@@ -54,7 +54,7 @@ const register = (req, res) => {
                 db.User.create(newUser, (err, savedUser) => {
                     if (err) return res.status(500).json({ status: 500, message: err })
 
-                    return res.status(200).json({ status: 200, userId: savedUser._id, message: `${newUser.name} registered as new user.`})
+                    return res.status(200).json({ status: 200, userId: savedUser._id, userName: savedUser.name, message: `${newUser.name} registered as new user.`})
                 })
             })
         })
@@ -66,19 +66,25 @@ const login = (req, res) => {
         return res.status(400).json({ status: 400, message: 'Please enter your email and password.'});
     }
 
+
     db.User.find({ email: req.body.email }, (err, foundUser) => {
-        if (err) return res.status(500).json({ status: 500, message: `${err}`});
+        if (err) {
+            return res.status(500).json({ status: 500, message: `Error logging in user`});
+        }
 
         if (!foundUser) {
             return res.status(400).json({ status: 400, message: 'User was not found.'});
         }
 
-        bcrypt.compare(req.body.password, foundUser.password, (err, isMatch) => {
-            if (err) return res.status(500).json({ status: 500, message: `${err}` });
+        bcrypt.compare(req.body.password, foundUser[0].password, (err, isMatch) => {
+            if (err) {
+                return res.status(500).json({ status: 500, message: `Error with bcrypt compare` });
+            }
 
             if (isMatch) {
-                req.session.currentUser = { id: foundUser._id };
-                return res.status(200).json({ status: 200, message: 'Success', data: foundUser._id});
+                //PROBABLY AN ISSUE WITH THIS LINE
+                req.session.currentUser = { id: foundUser[0]._id };
+                return res.status(200).json({ status: 200, message: 'Success', data: foundUser[0]});
             } else {
                 return res.status(400).json({ status: 400, message: 'Email or password is incorrect'});
             }
@@ -87,6 +93,7 @@ const login = (req, res) => {
 };
 
 const logout = (req, res) => {
+    console.log(req.session)
     if(!req.session.currentUser) return res.status(401).json({ status: 401, message: 'Unauthorized' });
     req.session.destroy((err) => {
         if (err) return res.status(500).json({ status: 500, message: `${err}` });
